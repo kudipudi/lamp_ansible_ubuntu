@@ -1,0 +1,20 @@
+---
+# These tasks install http and the php modules.
+
+- name: Install http and php etc
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+   - apache2
+   - php5
+   - php5-mysql
+   - git
+   - python-pip
+
+- name: insert iptables rule for httpd
+  lineinfile: dest=/etc/sysconfig/iptables create=yes state=present regexp="{{ httpd_port }}" insertafter="^:OUTPUT "
+              line="-A INPUT -p tcp  --dport {{ httpd_port }} -j  ACCEPT"
+  notify: restart iptables
+
+- name: http service state
+  service: name=apache2 state=started enabled=yes
+
